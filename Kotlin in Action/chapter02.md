@@ -225,7 +225,7 @@ import ch02.colors.Color
 import ch02.colors.Color.*
 
 fun mix(cl: Color, c2: Color) =
-    when (setOf(c1, c2) {               // when 식의 인자로 아무 객체나 사용할 수 있다
+    when (setOf(c1, c2)) {               // when 식의 인자로 아무 객체나 사용할 수 있다
                                         // when은 이렇게 인자로 받은 객체가 각 분기 조건에 있는 객체와 같은지 테스트한다
         setOf(RED, YELLOW) -> ORANGE    // 두 색을 혼합해서 다른 색을 만들 수 있는 경우를 열거
         setOf(YELLOW, BLUE) -> GREEN
@@ -444,7 +444,7 @@ fun readNumber(reader: BufferedReader) {
     println(number)
 }
 >>> val reader = BufferedReader(StringReader("not a number"))
->>> readNumber(reader)      // 아무것도 출려되지 않는다
+>>> readNumber(reader)      // 아무것도 출력되지 않는다
 
 // catch에서 값 반환하기
 fun readerNumber(reader: BufferedReader) {
