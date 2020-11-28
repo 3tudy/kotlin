@@ -322,8 +322,99 @@ val (number, name) = 1 to "one" // 구조 분해 선언
 
 ### 3.5.1 문자열 나누기
 
+코틀린에서는 자바의 `spilt` 대신에 여러 가지 다른 조합의 파라미터를 받는 `split` 확장 함수를 제공해 혼동을 야기하는 메소드를 감춘다.
+
+- 정규식을 파라미터로 받는 함수는 `String`이 아닌 `Regex` 타입의 값을 받는다.
+
+```kotlin
+>>> println("12.345-6.A".split("\\/|-"/toRegex()))  // 정규식을 명시적으로 만든다
+[12, 345, 6, A]
+```
+
 ### 3.5.2 정규식과 3중 따옴표로 묶은 문자열
+
+```kotlin
+fun parsePath(path: String) {
+    val regex = """(.+)/(.+)\.(.+)""".toRegex()     // 3중 따옴표 문자열에서는 역슬래시(\)를 포함한 어떤 문자도 이스케이프할 필요가 없다.
+    val matchResult = regex.matchEntire(path)
+    if (matchResult != null) {
+        val (directory, filename, extension) = matchResult.destructed
+        println("Dir: $directory, name: $filename, ext: $extension")
+    }
+}
+```
 
 ### 3.5.3 여러 줄 3중 따옴표 문자열
 
+줄바꿈이 있는 문자열이 3중 따옴표에는 그대로 들어갈 수 있다,
+
+```kotlin
+val kotlinLogo = """ |  //
+                    .| //
+                    .|/ \"""
+>>> println(kotlinLogo.trimMargin("."))
+|  //
+| //
+|/ \
+```
+
 ## 3.6 코드 다듬기: 로컬 함수와 확장
+
+코틀린에서는 함수에서 추출한 함수를 원 함수 내부에 중첩시킬 수 있다.
+
+```kotlin
+class User(val id: Int, val name: String, val address: String)
+fun saveUser(user: User) {
+    fun validate(user: User,
+                 value: String,
+                 fieldName: String) {
+        if (value.isEmpty()) {
+            throw IllegalArgumentException(
+                "Can't save user ${user.id}: empty $fieldName"
+            )
+        }
+    }
+    validate(user, user.name, "Name")
+    validate(userm user.address, "Address")
+}
+```
+
+로컬 함수는 자신이 속한 바깥 함수의 모든 파라미터와 변수를 사용할 수 있다.
+
+```kotlin
+class User(val id: Int, val name: String, val address: String)
+fun saveUser(user: User) {
+    fun validate(value: String, fieldName: String) {
+        if (value.isEmpty()) {
+            throw IllegalArgumentException(
+                "Can't save user ${user.id}: " +
+                    "empth $fieldName"
+            )
+        }
+    }
+    validate(user.name, "Name")
+    validate(user.address, "Address")
+}
+```
+
+확장 함수로 클래스에 종속 시킬 수 있다.
+
+```kotlin
+class User(val id: Int, val name: String, val address: String)
+fun User.validateBeforeSave() {
+    fun validate(value: String, fieldName: String) {
+        if (value.isEmpty()) {
+            throw IllegalArgumentException(
+                "Can't save user $id: empty $fieldName"
+            )
+        }
+    }
+    validate(name, "Name")
+    validate(address, "Address")
+}
+fun saveUser(user: User) {
+    user.validateBeforeSave()
+}
+```
+
+파이썬의 디스크립터처럼 사용할 수 도 있을 거 같다.
