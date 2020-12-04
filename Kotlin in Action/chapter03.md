@@ -92,7 +92,7 @@ fun <T> joinToString(
 ---
 [개발이 하고 싶어요](https://hyeonstorage.tistory.com/185)
 
-### 3.2.3 정적인 유틸리티 클랙스 없애기: 최상위 함수와 프로퍼티
+### 3.2.3 정적인 유틸리티 클래스 없애기: 최상위 함수와 프로퍼티
 
 1. 어느 한 클래스에 포함시키기 애매한 코드
 2. 일부 연산에서 비슷하게 중요한 역할을 하는 클래스가 둘 이상 있을 때(?)
@@ -147,7 +147,7 @@ StringFunctions.joinToString(list, ", ", "", "");
 기존 Java API를 재작성하지 않고도 코틀린이 제공하는 기능을 사용할 수 있도록 해주는 **확장 함수<sup>extension function</sup>**.
 
 - 어떤 클래스의 멤버 메소드인 거처럼 호출할 수 있지만 그 클래스의 밖에 선언된 함수
-- **수신 객체 타입<sup>receiver type</sup>**의 클래스에 새로운 함수를 추가로 정의하는 거라 생각하면 될 거 같다
+- **수신 객체 타입<sup>receiver type</sup>** 의 클래스에 새로운 함수를 추가로 정의하는 거라 생각하면 될 거 같다
 
 ```kotlin
 package strings
@@ -195,7 +195,7 @@ char c = StringUtilKt.lastChar("Java");
 
 ```kotlin
 // joinToString()을 확장으로 정의하기
-fun <T> Collections<T>.joinToString(
+fun <T> Collection<T>.joinToString(
     separater: String=", ",
     prefix: String="",
     postfix: String=""
@@ -271,7 +271,7 @@ Kotlin!
 
 ## 3.4 컬렉션 처리: 가변 길이 인자, 중위 함수 호출, 라이브러리 지원
 
-- `varang` 키워드를 사용하면 호출 시 인자 개수가 달라질 수 있는 함수를 정의할 수 있다
+- `vararg` 키워드를 사용하면 호출 시 인자 개수가 달라질 수 있는 함수를 정의할 수 있다
 - 중위<sup>infix</sup> 함수 호출 구문을 사용하면 인자가 하나뿐인 메소드를 간편하게 호출할 수 있다
 - 구조 분해 선언<sup>destructuring declaration</sup>을 사용하면 복합적인 값을 분해해서 여러 변수에 나눠 담을 수 있다
 
@@ -327,7 +327,7 @@ val (number, name) = 1 to "one" // 구조 분해 선언
 - 정규식을 파라미터로 받는 함수는 `String`이 아닌 `Regex` 타입의 값을 받는다.
 
 ```kotlin
->>> println("12.345-6.A".split("\\/|-"/toRegex()))  // 정규식을 명시적으로 만든다
+>>> println("12.345-6.A".split("\\/|-".toRegex()))  // 정규식을 명시적으로 만든다
 [12, 345, 6, A]
 ```
 
@@ -417,4 +417,4 @@ fun saveUser(user: User) {
 }
 ```
 
-파이썬의 디스크립터처럼 사용할 수 도 있을 거 같다.
+파이썬의 디스크립터처럼 사용할 수도 있을 거 같다.
