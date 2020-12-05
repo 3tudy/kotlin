@@ -363,7 +363,10 @@ class Client(val anme: String, val postalCode: Int) {
 
 - 코틀린의 `is` 검사는 자바의 `instanceof`와 같다. 둘다 어떤 타입의 값을 검사한다.
 
-Q. override 변경자가 필수인 것과 override fun equals(other: Client)를 작성할 수 없는 것과는 어떤 관련이 있는가?
+Q. `override` 변경자가 필수인 것과 `override fun equals(other: Client)`를 작성할 수 없는 것과는 어떤 관련이 있는가?
+
+A. 오버라이드할 때는 리턴 타입, 메소드 명, 매개변수가 같아야하기 때문이다.
+*https://programmingnote.tistory.com/29 참조*
 
 #### 해시 컨테이너: hashCode()
 
@@ -398,15 +401,15 @@ data class Client(val name: String, val postalCode: Int)
 
 이제 위 Client 클래스는 자바에서 요구하는 모든 메소드를 포함한다.
 
-- 인스턴ㄴ스 간 비교를 위한 `equals`
+- 인스턴스 간 비교를 위한 `equals`
 - `HashMap`과 같은 해시 기반 컨테이너에서 키로 사용할 수 있는 `hashCode`
-- 클랫의 각 필드를 선언 순서대로 표시하는 문자열 표현을 만들어주는 `toString`
+- 클래스의 각 필드를 선언 순서대로 표시하는 문자열 표현을 만들어주는 `toString`
 
 > `equals`와 `hashCode`는 **주 생성자**에 나열된 모든 프로퍼티를 고려해 만들어진다. 따라서 주 생성자 밖에 정의된 프로퍼티는 `equals`나 `hashCode`를 계산할 때 고려의 대상이 아니라는 사실에 유의해야 한다.
 
 코틀린 컴파일러는 `data` 클래스에게 방금 말한 세 메소드뿐 아니라 몇 가지 유용한 메소드를 더 생성해준다.
 
-#### 데이터 클래스와 불변성: copy() 메소드
+#### 데이터 클래스와 불변성: `copy()` 메소드
 
 > 데이터 클래스의 모든 프로퍼티가 꼭 `val`일 필요는 없으나 데이터 클래스는 모든 프로퍼티를 읽기 전용으로 만드는 것이 권장된다. `HashMap` 등의 컨테이너에 데이터 클래스 객체를 담는 경우엔 불변성이 필수적이다.
 
@@ -418,7 +421,7 @@ data class Client(val name: String, val postalCode: Int)
 Client(name=이계영, postalCode=4000)
 ```
 
-### 4.3.3 클래스 위임: by 키워드 사용
+### 4.3.3 클래스 위임: `by` 키워드 사용
 
 > 하위 클래스가 상위 클래스의 메소드 중 일부를 오버라이드하면 하위 클래스는 상위 클래스의 세부 구현 사항에 의존하게 된다. 시스템이 변함에 따라 하위 클래스가 상위 클래스에 대해 갖고 있던 가정이 깨져서 코드가 정상적으로 작동하지 못하는 경우가 생길 수 있다.
 
@@ -480,7 +483,7 @@ class CountingSet<T>(
 
 ### 4.4.1 객체 선언: 싱글턴을 쉽게 만들기
 
-코틀린은 **객체 선언** 기능을 통해 싱글컨을 언어에서 기본 지원한다.
+코틀린은 **객체 선언** 기능을 통해 싱글턴을 언어에서 기본 지원한다.
 
 ```kotlin
 object Payroll {
@@ -650,7 +653,7 @@ val p = Person.fromJSON(json)
 
 ### 4.4.4 객체 식: 무명 내부 클래스를 다른 방식으로 작성
 
-**무명 객체<sup>anonymous object</sup>를 정의할 때도 `object` 키워드를 쓴다.
+**무명 객체<sup>anonymous object</sup>**를 정의할 때도 `object` 키워드를 쓴다.
 
 ```kotlin
 window.addMouseListener(
