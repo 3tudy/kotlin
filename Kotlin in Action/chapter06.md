@@ -303,26 +303,236 @@ Error: Type parameter bound for 'T' is not satisfied
 
 ## 6.2 코틀린의 원시 타입
 
+> 코틀린은 원시 타입과 래퍼 타입을 구분하지 않는다.
+
 ### 6.2.1 원시 타입: `Int`, `Boolean` 등
+
+> 자바는 원시 타입과 참조 타입을 구분한다. 자바는 참조 타입이 필요한 경우 특별한 래퍼 타입으로 원시 타입 값을 감싸서 사용한다.
+
+- 코틀린은 원시 타입과 래퍼 타입을 구분하지 않으므로 항상 같은 타입을 사용한다.
+
+    ```kotlin
+    val i: Int = 1
+    val list: List<Int> = listOf(1, 2, 3)
+    ```
+
+- 코틀린은 숫자 타입 등 원시 타입의 값에 대해 메소드를 호출할 수 있다.
+
+    ```kotlin
+    fun showProgress(progress: Int) {
+        val percent = progress.coerceIn(0, 100)
+        println("We're ${percent}% done!")
+    }
+    >>> showProgress(146)
+    We're 100% done!
+    ```
+
+> 실행 시점에 숫자 타입은 가능한 한 가장 효율적인 방식으로 표현된다. 대부분의 경우 코틀린의 `Int` 타입은 자바 `int` 타입으로 컴파일된다. 하지만 컬렉션과 같은 제네릭 클래스를 사용할 때는 `Int` 타입을 **컬렉션의 타입 파라미터**로 넘기면 그 컬렉션에서는 `Int`의 래퍼 타입인 `java.lang.Integer` 객체가 들어간다.
+
+- 코틀린의 원시 타입은 `null` 참조가 들어갈 수 없기 때문에 그에 상응하는 자바 원시 타입으로 컴파일 할 수 있다.
+- 마찬가지로 자바 원시 타입의 값은 결코 `null`이 될 수 없으므로 자바 원시 타입을 코틀린에서 사용할 때도 `null`이 될 수 없는 타입으로 취급할 수 있다.
 
 ### 6.2.2 널이 될 수 있는 원시 타입: `Int?`, `Boolean?` 등
 
+> 코틀린에서 `null`이 될 수 있는 원시 타입을 사용하면 그 타입은 자바의 래퍼 타입으로 컴파일된다.
+
 ### 6.2.3 숫자 변환
+
+> 코틀린은 한 타입의 숫자를 다른 타입의 숫자로 자동 변환하지 않는다. 결과 타입이 허용하는 숫자의 범위가 원래 타입의 범위보다 얿은 경우조차도 자동 변환은 불가능하다.
+
+```kotlin
+val i = 1
+val l: Long = i // Error: type mismatch
+
+val i = 1
+val l: Long = i.toLong()    // 직접 변환 메소드를 호출하여 형변환이 가능하다.
+```
+
+- 코틀린 산술 연산자에서도 자바와 똑같이 숫자 연산 시 오버플로우가 발생할 수 있으나 자동 형변환을 허용하지 않기에 오버플로우를 검사하느라 추가 비용을 들이지는 않는다.
 
 ### 6.2.4 `Any`, `Any?`: 최상위 타입
 
+> 자바에서 `Object`가 클래스 계층의 최상위 타입이듯 코틀린에서는 `Any` 타입이 모든 `null`이 될 수 없는 타입의 조상 타입이다. 코틀린에서는 `Any`가 `Int` 등의 원시 타입을 포함한 모든 타입의 조상 타입이다.
+
+```kotlin
+val answer: Any = 42    // Any가 참조 타입이기 때문에 42가 박싱된다.
+                        // Any는 널이 될 수 없는 타입이다.
+                        // 널이 될 수 있는 타입은 Any?를 사용해야 한다.
+```
+
 ### 6.2.5 `Unit` 타입: 코틀린의 `void`
 
+> 코틀린 `Unit` 타입은 자바 `void`와 같은 기능을 한다.
+
+```kotlin
+fun f(): Unit { ... }
+
+fun f() { ... } // 반환 타입을 명시하는 것을 생략할 수 있다.
+```
+
+> `Unit`은 모든 기능을 같는 일반적인 타입이며, `void`와 달리 `Unit`을 타입 인자로 쓸 수 있다.`Unit` 타입에 속한 값은 단 하나뿐이며, 그 이름도 `Unit`이다. `Unit` 타입의 함수는 `Unit` 값을 묵시적으로 반환한다.
+
+```kotlin
+interface Processor<T> {
+    fun process(): T
+}
+class NoResultProcessor: Processor<Unit> {
+    override fun process() {    // Unit을 반환하지만 타입을 지정할 필요는 없다.
+        // 업무 처리 코드
+        // return을 명시할 필요가 없다.
+    }
+}
+```
+
 ### 6.2.6 `Nothing` 타입: 이 함수는 결코 정상적으로 끝나지 않는다
+
+> `Nothing` 타입은 아무 값도 포함하지 않는다. 따라서 `Nothing`은 **함수의 반환 타입**이나 **반환 타입으로 쓰일 타입 파라미터**로만 쓸 수 있다.
+
+```kotlin
+fun fail(message: String): Nothing {
+    throw IllegalStateException(message)
+}
+>>> fail("Error occurred")
+java.lang.IllegalStateException: Error occurred
+```
+
+- `Nothing`을 반환하는 함수를 엘비스 연산자의 우항에 사용해서 전제 조건을 검사할 수 있다.
+
+    ```kotlin
+    val address = company.address ?: fail("No address")
+    println(address.city)
+    ```
 
 ## 6.3 컬렉션과 배열
 
 ### 6.3.1 널 가능성과 컬렉션
 
+```kotlin
+List<Int?>  // 리스트 자체는 항상 null이 아니다.
+            // 각 원소는 null이 될 수 있다.
+
+List<Int>?  // 리스트를 가리키는 변수에는 null이 들어갈 수 있다.
+            // 각 원소는 null이 아닌 값만 들어갈 수 있다.
+```
+
+- `null`이 될 수 있는 원소를 가지는 컬렉션은 각 원소가 `null`인지를 항상 검사해야 한다.
+
+    ```kotlin
+    fun addValidNumbers(numbers: List<Int?>) {
+        var sumOfValidNumbers = 0
+        var invalidNumbers = 0
+        for (number in numbers) {   // null이 될 수 있는 값을 읽는다.
+            if (number != null) {   // null에 대한 값을 확인한다.
+                sumOfValidNumbers += number
+            } else {
+                invalidNumbers++
+            }
+        }
+        println("Sum of valid numbers: $sumOfValidNumbers)
+        println("Invalid numbers: $invalidNumbers")
+    }
+    >>> val reader = BufferedReader(StringReader("1\nabc\n42"))
+    >>> val numbers = readNumbers(reader)
+    >>> addValidNumbers(numbers)
+    Sum of valid numbers: 43
+    Invalid numbers: 1
+    ```
+
 ### 6.3.2 읽기 전용과 변경 가능한 컬렉션
+
+> 코틀린 컬렉션과 자바 컬렉션을 나누는 가장 중요한 특성 하나는 코틀린에서는 컬렉션 안의 **데이터에 접근하는 인터페이스**와 컬렉션 안의 **데이터를 변경하는 인터페이스**를 **분리**했다는 점이다.
+
+- `kotlin.collections.Collection` 인터페이스를 사용하면 컬렉션 안의 데이터에 **접근**은 가능하지만 변경은 할 수 없다.
+- `kotlin.collections.MutableCollection` 인터페이스를 사용해 컬렉션 안의 데이터를 **수정**할 수 있다.
+- `MutableCollection`은 일반 인터페이스는 `kotlin.collections.Collection`을 확장하면서 원소를 추가하거나, 삭제하거나, 컬렉션 안의 원소를 모두 지우는 등의 메소드를 더 제공한다.
+- 코드에서는 가능하면 항상 **읽기 전용** 인터페이스를 사용하는 것이 좋다.
+
+```kotlin
+fun <T> copyElements(source: Collection<T>, target: MutableCollection<T>) {
+    for (item in source) {
+        target.add(item)
+    }
+}
+>>> val source: Collection<Int> = arrayListOf(3, 5, 7)
+>>> val target: MutableCollection<Int> = arrayListOf(1)
+>>> copyElements(source, target)
+>>> println(target)
+[1, 3, 5, 7]
+
+// target에 읽기 전용 컬렉션을 넘기면 컴파일 오류가 발생한다.
+>>> val source: Collection<Int> = arrayListOf(3, 5, 7)
+>>> val target: Collection<Int> = arrayListOf(1)
+>>> copyElements(source, target)
+Error: Type mismatch: inferred type is Collection<Int>
+    but MutableCollection<Int> was expected
+```
+
+- 같은 컬렉션 객체를 다른 타입의 참조들이 가리킬 수 있다.
 
 ### 6.3.3 코틀린 컬렉션과 자바
 
+> 코틀린은 모든 자바 컬렉션 인터페이스마다 읽기 전용 인터페이스와 변경 가능한 인터페이스라는 두가지 표현을 제공한다.
+
+| 컬렉션 타입 | 읽기 전용 타입 | 변경 가능 타입 |
+|---|---|---|
+| `List` | `listOf` | `mutableListOf`, `arrayListOf` |
+| `Set` | `setOf` | `mutableSetOf`, `hashSetOf`, `linkedSetOf`, `sortedSetOf` |
+| `Map` | `mapOf` | `mutableMapOf`, `hashMapOf`, `linkedMapOf`, `sortedMapOf` |
+
+- 변경 불가능한 컬렉션 타입을 넘겨도 자바 쪽에서 내용을 변경할 수 있다.
+
+    ```kotlin
+    /* java code */
+    // CollectionUtils.java
+    public class CollectionUtils {
+        public static List<String> uppercaseAll(List<String> items) {
+            for (int i=0; i<items.size(); i++) {
+                items.set(i, items.get(i).toUpperCase());
+            }
+            return items;
+        }
+    }
+
+    /* kotlin code */
+    // collections.kt
+    fun printInUppercase(list: List<String>) {
+        println(CollectionsUtils.uppercaseAll(list))
+        println(list.first())
+    }
+    >>> val list = listOf("a", "b", "c")
+    >>> printInUppercase(list)
+    [A, B, C]
+    A
+    ```
+
 ### 6.3.4 컬렉션을 플랫폼 타입으로 다루기
 
+> 자바쪽에서 선언한 컬렉션 타입의 변수를 코틀린에서는 플랫폼 타입으로 본다. 코틀린 코드는 그 타입을 읽기 전용 컬렉션이나 변경 가능한 컬렉션 어느 쪽으로든 다룰 수 있다.
+
+컬렉션의 타입을 결정하기 위한 고려사항
+
+- 컬렉션이 `null`이 될 수 있는가?
+- 컬렉션의 원소가 `null`이 될 수 있는가?
+- 오버라이드하는 메소드가 컬렉션을 변경할 수 있는가?
+
 ### 6.3.5 객체의 배열과 원시 타입의 배열
+
+코틀린에서 배열을 만드는 방법
+
+- `arrayOf` 함수에 원소를 넘긴다.
+- `arrayOfNulls` 함수에 정수 값을 인자로 넘기면 모든 원소가 `null`이고 인자로 넘긴 값과 크기가 같은 배열을 만들 수 있다.
+- `Array` 생성자는 배열 크기와 람다를 인자로 받아서 람다를 호출해서 각 배열 원소를 초기화해준다.
+
+    ```kotlin
+    >>> val letters = Array<String>(26) { i -> ('a' + i).toString() }
+    >>> println(letters.joinToString(""))
+    abcdefghijklmnopqrstuvwxyz
+    ```
+
+- 코틀린은 원시 타입의 배열을 표현하는 별도 클래스를 각 원시 타입마다 하나씩 제공한다.
+
+    | Java | Kotlin |
+    |:---:|:---:|
+    | `int[]` | `IntArray` |
+    | `byte[]` | `ByteArray` |
+    | `char[]` | `CharArray` |
