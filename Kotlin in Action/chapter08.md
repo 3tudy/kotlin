@@ -371,6 +371,103 @@ synchronized(l) {
 
 ### 8.3.1 람다 안의 `return`문: 람다를 둘러싼 함수로부터 반환
 
+- 일반 루프 안에서 `return` 사용하기
+
+    ```kotlin
+    data class Person(val name: String, val age: Int)
+    val people = listOf(Person("Alice", 29), Person("Bob", 31))
+    fun lookForAlice(people: List<Person>) {
+        for (person in people) {
+            if (person.name == "Alice") {
+                println("Fount!")
+                return
+            }
+        }
+        println("Alice is not found")
+    }
+    >>> lookForAlice(people)
+    Found!
+    ```
+
+- `forEach`로 바꿔보기
+
+    ```kotlin
+    fun lookForAlice(people: List<Person>) {
+        people.forEach {
+            if (it.name == "Alice") {
+                println("Found!")
+                return  // 위 함수와 마찬가지로 lookForAlice 함수에서 반환된다.
+            }
+        }
+        println("Alice is not found")
+    }
+    ```
+
+    - 람다 안에서 `return`을 사용하면 람다로부터만 반환되는 게 아니라 그 람다를 호출하는 함수가 실행을 끝내고 반환된다.
+
+> 자신을 둘러싸고 있는 블록보다 더 바깥에 있는 다른 블록을 반환하게 만드는 `return`문을 넌로컬<sup>non-local</sup> return이라 부른다.
+
+- 자바의 경우 `return`은 `for` 루프나 `synchronized` 블록을 끝내지 않고 메소드를 반환시킨다.
+- 코틀린에서는 언어가 제공하는 기본 구성 요소가 아니라 람다를 받는 함수로 `for`나 `synchronized`와 같은 기능을 구현한다. 코틀린은 그런 함수 안에서 쓰이는 `return`이 자바의 `return`과 같은 의미를 갖게 허용한다.
+- 위와 같이 `return`이 바깥쪽 함수를 반환시킬 수 있는 때는 람다를 인자로 받는 함수가 **인라인 함수**인 경우뿐이다.
+- **인라이닝이 되지 않는 함수**에 전달되는 람다안에서 `return`을 **사용할 수는 없다.**
+
 ### 8.3.2 람다로부터 반환: 레이블을 사용한 `return`
 
+> 람다 식에서도 **로컬 return**을 사용할 수 있다. 람다 안에서 로컬 return은 `for`루프의 `break`와 비슷한 역할을 한다.
+
+- 로컬 return과 넌로컬 return을 구분하기 위해 **레이블**을 사용해야 한다. `return`으로 실행을 끝내고 싶은 람다 식 앞에 레이블을 붙이고, `return` 키워드 뒤에 그 레이블을 추가하면 된다.
+
+    ```kotlin
+    fun lookForAlice(people: List<Person>) {
+        people.forEach label@{  // 람다 식 앞에 붙은 label
+            if (it.name == "Alice") return@label    // 앞에서 정의한 label을 참조한다.
+        }
+        println("Alice might be somewhere") // 이 줄은 항상 출력된다.
+    }
+    >>> lookForAlice(people)
+    Alice might be somewhere
+    ```
+
+- 람다에 레이블을 붙여서 사용하는 대신 람다를 인자로 받는 인라인 함수의 이름을 `return` 뒤에 레이블로 사용해도 된다.
+
+    ```kotlin
+    fun lookForAlice(people: List<Person>) {
+        people.forEach {
+            if (it.name == "Alice") return@forEach  // forEach를 끝낸다.
+        }
+        println("Alice might be somewhere")
+    }
+    ```
+
 ### 8.3.3 무명 함수: 기본적으로 로컬 `return`
+
+> 무명 함수는 코드 블록을 함수에 넘길 때 사용할 수 있는 다른 방법이다.
+
+- 무명 함수 안에서 `return` 사용하기
+
+    ```kotlin
+    fun lookForAlice(people: List<Person>) {
+        people.forEach(fun (person) {   // 람다 식 대신 무명 함수를 사용
+            if (person.name == "Alice") return  // return은 가장 가까운 함수를 가리킨다.
+                                                // 이 경우, 그건 무명 함수이다.
+            println("${person.name} is not Alice")
+        })
+    }
+    >>> lookForAlice(people)
+    Bob is not Alice
+    ```
+
+- `filter`에 무명 함수 넘기기
+
+    ```kotlin
+    people.filter(fun (person): Boolean {
+        return person.age < 30
+    })
+    ```
+
+    - 식을 본문으로 하는 무명 함수의 반환 타입은 생략할 수 있다.
+
+#### `return`에 적용되는 규칙은 단순히 "`return`은 `fun` 키워드를 사용해 정의된 가장 안쪽 함수를 반환시킨다"는 점이다
+
+- 람다 식은 `fun`을 사용해 정의되지 않으므로 람다 본문의 `return`은 람다 밖에 함수를 반환시킨다.
