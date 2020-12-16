@@ -503,7 +503,7 @@ button1.setOnClickListener(listener)
 button2.setOnClickListener(listener)
 ```
 
-## 5.5 수신 객체 지정 람다: `with`와 `apply
+## 5.5 수신 객체 지정 람다: `with`와 `apply`
 
 수신 객체를 명시하지 않고 람다의 본문 안에서 다른 객체의 메소드를 호출할 수 있게 한다.
 
