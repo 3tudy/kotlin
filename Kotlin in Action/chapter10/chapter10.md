@@ -171,7 +171,68 @@ data class Person(
 
 ## 10.2 리플렉션: 실행 시점에 코틀린 객체 내부 관찰
 
+> 리플렉션은 실행 시점에 (동적으로) 객체의 프로퍼티와 메소드에 접근할 수 있게 해주는 방법이다.
+
+타입과 관계없이 객체를 다뤄야 하거나 객체가 제공하는 메소드나 프로퍼티 이름을 오직 실행 시점에만 알 수 있는 경우 : JSON 직렬화 라이브러리
+
+직렬화 라이브러리는 어떤 객체든 JSON으로 변환할 수 있어야 하고, 실행 시점이 되기 전까지는 라이브러리가 직렬화할 프로퍼티나 클래스에 대한 정보를 알 수 없다.
+
+코틀린에서 리플렉션을 사용하려면 두 가지 서로 다른 리플렉션 API를 다뤄야 한다.
+
+1. 자바가 `java.lang.reflect` 패키지를 통해 제공하는 표준 리플렉션
+2. API는 코틀린이 `kotlin.reflect` 패키지를 통해 제공하는 코틀린 리플렉션 API
+
+코틀린 리플렉션 API만으로는 기능이 부족할 수 있어 자바의 리플렉션 API 또한 다룰 수 있어야 한다.
+
 ### 10.2.1 코틀린 리플렉션 API: KClass, KCallable, KFunction, KProperty
+
+> `java.lang.Class`에 해당하는 `KClass`를 사용하면 클래스 안에 있는 모든 선언을 열거하고 각 선언에 접근하거나 클래스의 상위 클래스를 얻는 등의 작업이 가능하다.
+
+```kotlin
+/* KClass 인스턴스를 얻는 선언 */
+MyClass::class
+```
+
+실행 시점에 객체의 클래스를 얻으려면 객체의 `javaClass` 프로퍼티를 사용해 객체의 자바 클래스를 얻어야 한다.
+
+```kotlin
+class Person(val name: String, val age: Int)
+>>> import kotlin.reflect.full.*    // memberProperties 확장 함수 임포트
+>>> val person = Person("Alice", 29)
+>>> val kClass = person.javaClass.kotlin    // KClass<Person>의 인스턴스를 반환
+>>> println(kClass.simpleName)
+Person
+>>> kClass.memberProperties.forEach { println(it.name) }
+age
+name
+```
+
+#### `KCallable`은 함수와 프로퍼티를 아우르는 공통 상위 인터페이스다
+
+`KCallable` 안에는 `call()` 메소드가 들어있다. `call()`을 ㅅ용하면 함수나 프로퍼티의 게터를 호출할 수 있다.
+
+```kotlin
+interface KCallable<out R> {
+    fun call(vararg args: Any?): R
+    ...
+}
+```
+
+##### 리플렉션이 제공하는 `call`을 사용해 함수를 호출할 수 있다
+
+```kotlin
+fun foo(x: Int) = println(x)
+>>> val kFunction = ::foo
+>>> kFunction.call(42)
+42
+```
+
+#### KClass, KFunction, KParameter는 모두 KAnnotatedElement를 확장한다
+
+1. KClass는 클래스와 객체를 표현할 때 쓰인다.
+2. KProperty는 모든 프로퍼티를 표현할 수 있다
+3. KProperty의 하위 클래스인 KMutableProperty는 `var`로 정의한 변경 가능한 프로퍼티를 표현한다.
+4. KProperty와 KMutableProperty에 선언된 Getter와 Setter 인터페이스로 프로퍼티 접근자를 함수처럼 다룰 수 있다.
 
 ### 10.2.2 리플렉션을 사용한 객체 직렬화 구현
 
