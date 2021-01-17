@@ -34,7 +34,7 @@
 
 #### `kotlinx.coroutines.CoroutineScope.launch`
 
->`launch`는 코루틴을 잡<sup>Job</sub>으로 반환하며, 만들어진 코루틴은 기본적으로 **즉시 실행된다.** 원하면 `launch`가 반환한 `Job`의 `cancel()`을 호출해 **코루틴 실행을 중단**시킬 수 있다.
+>`launch`는 코루틴을 잡<sup>Job</sup>으로 반환하며, 만들어진 코루틴은 기본적으로 **즉시 실행된다.** 원하면 `launch`가 반환한 `Job`의 `cancel()`을 호출해 **코루틴 실행을 중단**시킬 수 있다.
 
 ```kotlin
 package com.enshahar.kotlinStudy
